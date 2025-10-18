@@ -6,6 +6,59 @@ export function makeInscripcionesService({ sequelize, models }) {
   const { Actividad, ActividadHorario, Inscripcion } = models;
 
   return {
+    async getActividades() {
+      const actividades = await Actividad.findAll({ 
+        include: [{ model: ActividadHorario, as: 'horarios' }] 
+      });
+      
+      return actividades.map(act => ({
+        id: act.id,
+        nombre: act.nombre,
+        requiereTalle: act.requiereTalle,
+        descripcion: getDescripcionActividad(act.nombre),
+        horarios: act.horarios.map(h => ({
+          hora: h.hora,
+          cupo: h.cupo
+        }))
+      }));
+    },
+
+    async getActividad(id) {
+      const actividad = await Actividad.findByPk(id, { 
+        include: [{ model: ActividadHorario, as: 'horarios' }] 
+      });
+      
+      if (!actividad) return null;
+      
+      return {
+        id: actividad.id,
+        nombre: actividad.nombre,
+        requiereTalle: actividad.requiereTalle,
+        descripcion: getDescripcionActividad(actividad.nombre),
+        horarios: actividad.horarios.map(h => ({
+          hora: h.hora,
+          cupo: h.cupo
+        }))
+      };
+    },
+
+    async getHorariosActividad(actividadId) {
+      const actividad = await Actividad.findByPk(actividadId, { 
+        include: [{ model: ActividadHorario, as: 'horarios' }] 
+      });
+      
+      if (!actividad) {
+        const err = new Error('actividad no encontrada');
+        err.httpStatus = 404;
+        throw err;
+      }
+      
+      return actividad.horarios.map(h => ({
+        hora: h.hora,
+        cupo: h.cupo
+      }));
+    },
+
     async inscribirEnActividad({ actividadId, horario, visitante, aceptaTerminos, talle }) {
       const act = await Actividad.findByPk(actividadId, { include: [{ model: ActividadHorario, as: 'horarios' }] });
       if (!act) {
@@ -96,4 +149,15 @@ export function makeInscripcionesService({ sequelize, models }) {
       });
     },
   };
+}
+
+// Función helper para obtener descripciones de actividades
+function getDescripcionActividad(nombre) {
+  const descripciones = {
+    'Tirolesa': 'Deslizate por la tirolesa y disfruta de las vistas panorámicas del parque. Se requiere vestimenta especial.',
+    'Safari': 'Recorre el parque en un safari guiado para observar la fauna local. No se requiere vestimenta especial.',
+    'Palestra': 'Escala nuestra palestra artificial y desafía tus límites físicos. Se requiere vestimenta deportiva.',
+    'Jardinería': 'Aprende técnicas de jardinería y cuida nuestro hermoso jardín. Se requiere ropa de trabajo.'
+  };
+  return descripciones[nombre] || 'Actividad recreativa en EcoHarmony Park';
 }
