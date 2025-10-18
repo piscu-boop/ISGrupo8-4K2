@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "node server.js",
+    "init-data": "node init-data.js",
     "test": "vitest --run",
     "test:watch": "vitest",
     "coverage": "vitest --coverage",

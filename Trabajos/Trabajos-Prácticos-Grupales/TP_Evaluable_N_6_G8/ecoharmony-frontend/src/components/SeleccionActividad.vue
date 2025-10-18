@@ -19,6 +19,7 @@
             v-for="actividad in actividades" 
             :key="actividad.id"
             class="actividad-card"
+            :class="{ 'sin-cupos': getHorariosDisponibles(actividad).length === 0 }"
             @click="seleccionarActividad(actividad)"
           >
             <div class="actividad-header">
@@ -34,10 +35,11 @@
             <p class="actividad-descripcion">{{ actividad.descripcion }}</p>
             
             <div class="actividad-horarios">
-              <h4>Horarios disponibles:</h4>
-              <div class="horarios-list">
+              <h4 v-if="getHorariosDisponibles(actividad).length > 0">Horarios disponibles:</h4>
+              <h4 v-else class="cupos-agotados">Cupos agotados</h4>
+              <div class="horarios-list" v-if="getHorariosDisponibles(actividad).length > 0">
                 <span 
-                  v-for="horario in actividad.horarios" 
+                  v-for="horario in getHorariosDisponibles(actividad)" 
                   :key="horario.hora"
                   class="horario-badge"
                 >
@@ -47,8 +49,12 @@
             </div>
             
             <div class="actividad-footer">
-              <button class="btn btn-primary">
-                Seleccionar {{ actividad.nombre }}
+              <button 
+                class="btn"
+                :class="getHorariosDisponibles(actividad).length > 0 ? 'btn-primary' : 'btn-disabled'"
+                :disabled="getHorariosDisponibles(actividad).length === 0"
+              >
+                {{ getHorariosDisponibles(actividad).length > 0 ? `Seleccionar ${actividad.nombre}` : 'Sin cupos disponibles' }}
               </button>
             </div>
           </div>
@@ -74,7 +80,14 @@ export default {
   emits: ['seleccionar'],
   methods: {
     seleccionarActividad(actividad) {
-      this.$emit('seleccionar', actividad)
+      // Solo permitir selección si hay horarios disponibles
+      if (this.getHorariosDisponibles(actividad).length > 0) {
+        this.$emit('seleccionar', actividad)
+      }
+    },
+    getHorariosDisponibles(actividad) {
+      // Filtrar solo los horarios con cupos > 0
+      return actividad.horarios ? actividad.horarios.filter(horario => horario.cupo > 0) : []
     },
     getActivityIcon(nombre) {
       const icons = {
@@ -117,6 +130,18 @@ export default {
   border-color: var(--primary-light);
   transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(61, 163, 93, 0.15);
+}
+
+.actividad-card.sin-cupos {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-color: #dee2e6;
+}
+
+.actividad-card.sin-cupos:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: #dee2e6;
 }
 
 .actividad-header {
@@ -165,6 +190,13 @@ export default {
   font-size: 1rem;
 }
 
+.cupos-agotados {
+  margin: 0 0 0.75rem 0;
+  color: #dc3545;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 .horarios-list {
   display: flex;
   flex-wrap: wrap;
@@ -198,6 +230,42 @@ export default {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Estilos para botones */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background: var(--primary-light);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.btn-disabled {
+  background: #6c757d;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-disabled:hover {
+  background: #6c757d;
+  transform: none;
 }
 
 @media (max-width: 768px) {
