@@ -7,6 +7,10 @@
       </div>
       
       <div class="card-body">
+        <!-- Alerta de validación de nombre -->
+        <div v-if="showValidation && hayNombreInvalido" class="alert alert-warning" role="alert" style="margin-bottom: 1rem;">
+          El nombre debe contener solo caracteres alfabéticos y espacios. No se permiten números ni símbolos.
+        </div>
         <!-- Resumen de la selección -->
         <div class="resumen-seleccion">
           <div class="resumen-header">
@@ -60,12 +64,15 @@
                         v-model="visitante.nombre"
                         type="text"
                         class="form-control"
-                        :class="{ 'is-invalid': !visitante.nombre && showValidation }"
+                        :class="{ 'is-invalid': (showValidation && (!visitante.nombre || !esNombreValido(visitante.nombre))) }"
                         placeholder="Ingresa el nombre completo"
                         @input="actualizarVisitante(index, 'nombre', $event.target.value)"
                       />
-                      <div v-if="!visitante.nombre && showValidation" class="invalid-feedback">
+                      <div v-if="showValidation && !visitante.nombre" class="invalid-feedback">
                         El nombre es obligatorio
+                      </div>
+                      <div v-else-if="showValidation && visitante.nombre && !esNombreValido(visitante.nombre)" class="invalid-feedback">
+                        El nombre solo puede contener letras y espacios
                       </div>
                     </div>
                   </div>
@@ -76,13 +83,18 @@
                       <input
                         v-model="visitante.dni"
                         type="text"
+                        inputmode="numeric"
+                        pattern="\\d*"
                         class="form-control"
-                        :class="{ 'is-invalid': (!visitante.dni && showValidation) || isDniDuplicado(visitante.dni, index) }"
+                        :class="{ 'is-invalid': (!visitante.dni && showValidation) || isDniDuplicado(visitante.dni, index) || (showValidation && !esDniNumerico(visitante.dni)) }"
                         placeholder="Ingresa el DNI"
-                        @input="actualizarVisitante(index, 'dni', $event.target.value)"
+                        @input="onDniInput(index, $event)"
                       />
                       <div v-if="!visitante.dni && showValidation" class="invalid-feedback">
                         El DNI es obligatorio
+                      </div>
+                      <div v-else-if="visitante.dni && showValidation && !esDniNumerico(visitante.dni)" class="invalid-feedback">
+                        El DNI debe contener solo números
                       </div>
                       <div v-if="isDniDuplicado(visitante.dni, index) && visitante.dni" class="invalid-feedback">
                         Este DNI ya está registrado para otro visitante
@@ -185,12 +197,18 @@ export default {
     }
   },
   computed: {
+    hayNombreInvalido() {
+      if (this.visitantes.length === 0) return false
+      return this.visitantes.some(v => v.nombre && !this.esNombreValido(v.nombre))
+    },
     puedeContinuar() {
       if (this.visitantes.length === 0) return false
       
       // Verificar que todos los visitantes tengan datos válidos
       const datosValidos = this.visitantes.every(visitante => {
-        const datosBasicos = visitante.nombre && visitante.dni && visitante.edad && visitante.edad > 0
+        const nombreValido = visitante.nombre && this.esNombreValido(visitante.nombre)
+        const dniValido = visitante.dni && this.esDniNumerico(visitante.dni)
+        const datosBasicos = nombreValido && dniValido && visitante.edad && visitante.edad > 0
         const talla = this.requiereTalle ? (visitante.talle && visitante.talle.trim() !== '') : true
         return datosBasicos && talla
       })
@@ -218,6 +236,13 @@ export default {
     },
     continuar() {
       this.showValidation = true
+      // Si hay nombres inválidos, mostrar alerta y no continuar
+      if (this.hayNombreInvalido) {
+        // Además del cartel en pantalla, notificamos con un alert del navegador
+        // para garantizar que el usuario lo vea cuando intenta continuar.
+        window.alert('El nombre debe contener solo letras y espacios. No se permiten números ni símbolos.')
+        return
+      }
       if (this.puedeContinuar) {
         this.$emit('continuar')
       }
@@ -249,6 +274,24 @@ export default {
         visitante.dni && 
         visitante.dni.trim().toLowerCase() === dni.trim().toLowerCase()
       )
+    },
+    esDniNumerico(dni) {
+      if (!dni) return false
+      return /^\d+$/.test(dni.trim())
+    },
+    onDniInput(index, event) {
+      // Limitar a solo dígitos mientras se escribe
+      const soloNumeros = (event.target.value || '').replace(/\D+/g, '')
+      event.target.value = soloNumeros
+      this.actualizarVisitante(index, 'dni', soloNumeros)
+    },
+    esNombreValido(nombre) {
+      if (!nombre) return false
+      // Acepta letras (incluye acentos y ñ), espacios simples entre palabras, y apóstrofos comunes. No números ni símbolos. Al menos 2 letras.
+      // Evita múltiples espacios consecutivos y espacios al inicio/fin.
+      const normalizado = nombre.trim().replace(/\s+/g, ' ')
+      const regex = /^(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:['’]?[A-Za-zÁÉÍÓÚáéíóúÑñ]+)?)(?:\s+(?:[A-Za-zÁÉÍÓÚáéíóúÑñ]+(?:['’]?[A-Za-zÁÉÍÓÚáéíóúÑñ]+)?))*$/
+      return normalizado.length >= 2 && regex.test(normalizado)
     }
   }
 }
