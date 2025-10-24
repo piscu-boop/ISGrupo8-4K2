@@ -218,7 +218,7 @@ describe("App - tests EcoHarmony actividades US 'Inscribirme a actividad'", () =
         visitante: [
           { nombre: "Pedro", dni: "111", edad: 35 },
           { nombre: "Lucía", dni: "222", edad: 32 },
-          { nombre: "Marta", dni: "333", edad: 29 },
+          { nombre: "Marta", dni: "333", edad: 2900 },
         ],
         aceptaTerminos: true,
       });

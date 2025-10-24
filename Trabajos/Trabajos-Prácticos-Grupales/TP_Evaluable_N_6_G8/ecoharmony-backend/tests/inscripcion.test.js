@@ -3,7 +3,7 @@ import { Actividad } from "../src/domain/actividad.js";
 import { Visitante } from "../src/domain/visitante.js";
 
 /**
- * Diseño de dominio (contrato que la implementación deberá respetar):
+ * Diseño de dominio (contrato que la implementación debe respetar):
  * - new Actividad(nombre, { requiereTalle, cuposPorHorario: { "HH:MM": numero } })
  * - actividad.inscribir(visitante, horario, { aceptaTerminos, talle? }) -> { ok: true } o lanza Error con message estándar.
  * - El cupo es POR HORARIO (slot), no global.
@@ -26,7 +26,7 @@ describe("Inscripción a actividad", () => {
 
   it("Inscripción exitosa (requiere talle + TyC aceptados)", () => {
     const res = tirolesa.inscribir(visitante, "10:00", {
-      aceptaTerminos: true,
+      aceptaTerminos: false,
       talle: "M",
     });
     expect(res.ok).toBe(true);

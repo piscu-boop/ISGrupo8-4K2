@@ -1,14 +1,11 @@
 import request from "supertest";
 import { describe, it, expect, beforeEach } from "vitest";
 
-// 👇 Asumimos que exportarás una factoría de app que recibe dependencias de dominio.
-// La implementaremos después. Por ahora, TDD: este import hará fallar hasta crear el archivo.
 import { createApp } from "../../src/app.js";
 
 // Utilidad: construimos un "contenedor" de dominio fake para las pruebas de integración.
 // La idea es inyectar actividades y servicios SIN tocar DB todavía.
 function makeInMemoryContainer() {
-  // Reusamos tus clases de dominio reales (unit tested).
   const { Actividad } = require("../../src/domain/actividad.js");
   const { Visitante } = require("../../src/domain/visitante.js");
 
@@ -33,7 +30,6 @@ function makeInMemoryContainer() {
       throw err;
     }
 
-    // Normalizamos el visitante a la clase real
     const v = new Visitante(visitante);
     try {
       const res = actividad.inscribir(v, horario, { aceptaTerminos, talle });
@@ -78,7 +74,6 @@ describe("POST /actividades/:id/inscripciones (integración)", () => {
 
     expect(res.body).toEqual({ ok: true });
 
-    // post: verifica que el cupo baje a 1 (usando el contenedor inyectado)
     const act = container.actividades.get("1");
     expect(act.cupoDisponible("10:00")).toBe(1);
   });
@@ -215,6 +210,3 @@ describe("POST /actividades/:id/inscripciones (integración)", () => {
   });
 });
 
-// Nota: este test inyecta un contenedor de dominio en memoria a createApp({ container }), 
-// así no dependemos de MySQL todavía. Es una muy buena práctica para TDD: integración HTTP 
-// real, dominio “real”, sin infraestructura.
