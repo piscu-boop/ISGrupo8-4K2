@@ -20,19 +20,33 @@ export class Actividad {
     return this._disponibilidad.get(h) ?? 0;
   }
 
-  // ⬇️ NUEVO: validación mínima del visitante según los tests
   _validarVisitante(visitante) {
-    const nombre = visitante?.nombre;
-    const dni = visitante?.dni;
-    const edad = visitante?.edad;
+    if (!visitante) {
+      throw new Error("visitante no seleccionado");
+    }
 
-    if (typeof dni !== "string" || dni.trim() === "") {
+    const { nombre, dni, edad } = visitante;
+
+    // DNI: debe ser string numérico, no vacío, sin letras ni símbolos
+    if (typeof dni !== "string" || !/^\d+$/.test(dni.trim())) {
       throw new Error("dni inválido");
     }
+
+    // Nombre: string no vacío
     if (typeof nombre !== "string" || nombre.trim() === "") {
       throw new Error("nombre inválido");
     }
-    if (typeof edad !== "number" || !Number.isFinite(edad) || edad <= 0) {
+
+    // Edad: debe ser número entero entre 1 y 99, no nulo ni string
+    if (
+      edad === null ||
+      edad === undefined ||
+      edad === "" ||
+      typeof edad !== "number" ||
+      !Number.isInteger(edad) ||
+      edad <= 0 ||
+      edad >= 100
+    ) {
       throw new Error("edad inválida");
     }
   }
@@ -42,6 +56,11 @@ export class Actividad {
 
     // validar visitante (para los tests rojos)
     this._validarVisitante(visitante);
+
+    // Horario no seleccionado (null, vacío, o solo espacios)
+    if (!h) {
+      throw new Error("horario no seleccionado");
+    }
 
     // horario debe existir
     if (!this._disponibilidad.has(h)) {
