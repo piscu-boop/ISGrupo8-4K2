@@ -26,7 +26,7 @@ describe("Inscripción a actividad", () => {
 
   it("Inscripción exitosa (requiere talle + TyC aceptados)", () => {
     const res = tirolesa.inscribir(visitante, "10:00", {
-      aceptaTerminos: false,
+      aceptaTerminos: true,
       talle: "M",
     });
     expect(res.ok).toBe(true);

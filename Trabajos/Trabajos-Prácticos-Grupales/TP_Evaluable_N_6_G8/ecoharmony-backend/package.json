@@ -10,7 +10,6 @@
     "test:watch": "vitest",
     "coverage": "vitest --coverage",
     "test:unit": "vitest --run tests/inscripcion.test.js",
-    "test:app": "vitest --run test/app.test.js",
     "test:integration": "vitest --run tests/integration",
     "test:integration:db": "vitest --run tests/integration/inscripciones.db.test.js"
   },
