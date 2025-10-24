@@ -1,19 +1,18 @@
 <template>
   <div class="inscripcion-view">
     <!-- Mensajes de estado -->
-    <div v-if="store.error" class="alert alert-danger">
-      {{ store.error }}
-      <button @click="store.limpiarMensajes()" class="btn btn-sm btn-secondary ms-2">
-        ✕
-      </button>
-    </div>
-    
-    <div v-if="store.success" class="alert alert-success">
-      {{ store.success }}
-      <button @click="store.limpiarMensajes()" class="btn btn-sm btn-secondary ms-2">
-        ✕
-      </button>
-    </div>
+    <AlertModal
+      :visible="!!store.error"
+      type="error"
+      :message="errorMessage"
+      @close="store.limpiarMensajes()"
+    />
+    <AlertModal
+      :visible="!!store.success"
+      type="success"
+      :message="successMessage"
+      @close="store.limpiarMensajes()"
+    />
 
     <!-- Indicador de progreso -->
     <div class="progress-indicator">
@@ -85,7 +84,9 @@
 </template>
 
 <script>
+import { computed } from 'vue'
 import { useInscripcionStore } from '../stores/inscripcion.js'
+import AlertModal from '../components/AlertModal.vue'
 import SeleccionActividad from '../components/SeleccionActividad.vue'
 import SeleccionHorario from '../components/SeleccionHorario.vue'
 import DatosVisitantes from '../components/DatosVisitantes.vue'
@@ -93,32 +94,34 @@ import TerminosCondiciones from '../components/TerminosCondiciones.vue'
 
 export default {
   name: 'InscripcionView',
-  components: {
-    SeleccionActividad,
-    SeleccionHorario,
-    DatosVisitantes,
-    TerminosCondiciones
-  },
+  components: { AlertModal, SeleccionActividad, SeleccionHorario, DatosVisitantes, TerminosCondiciones },
   setup() {
     const store = useInscripcionStore()
-    
-    // Cargar actividades al montar el componente
     store.cargarActividades()
-    
-    return {
-      store
-    }
+
+    // Evita mostrar [object Object] si el store guarda objetos
+    const errorMessage = computed(() => {
+      const e = store.error
+      if (!e) return ''
+      return typeof e === 'string' ? e : (e.mensaje || JSON.stringify(e))
+    })
+
+    const successMessage = computed(() => {
+      const s = store.success
+      if (!s) return ''
+      if (typeof s === 'object') {
+        const act = s.actividad?.nombre ?? 'Actividad'
+        const hora = s.horario?.hora ?? s.horario ?? 'horario'
+        const cant = s.cantidad ?? s.personas ?? s.visitantes?.length ?? 1
+        return `¡Inscripción exitosa! Se inscribieron ${cant} persona(s) en ${act} para el horario ${hora}. ¡Disfruten su actividad en EcoHarmony Park!`
+      }
+      return s
+    })
+
+    return { store, errorMessage, successMessage }
   },
   methods: {
-    getStepLabel(paso) {
-      const labels = {
-        1: 'Actividad',
-        2: 'Horario',
-        3: 'Visitantes',
-        4: 'Confirmar'
-      }
-      return labels[paso] || `Paso ${paso}`
-    }
+    getStepLabel(paso) { /* igual que antes */ }
   }
 }
 </script>

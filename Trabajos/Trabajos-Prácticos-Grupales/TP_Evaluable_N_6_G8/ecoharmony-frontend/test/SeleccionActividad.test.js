@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import SeleccionActividad from './SeleccionActividad.vue'
+import SeleccionActividad from '../src/components/SeleccionActividad.vue'
 
 describe('SeleccionActividad', () => {
   const actividadesMock = [

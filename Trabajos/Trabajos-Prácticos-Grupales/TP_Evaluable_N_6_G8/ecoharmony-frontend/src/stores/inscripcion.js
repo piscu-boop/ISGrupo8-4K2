@@ -158,7 +158,7 @@ export const useInscripcionStore = defineStore('inscripcion', {
           await this.actualizarCuposDisponibles()
         }
         
-        this.success = `🎉 ¡Inscripción exitosa! Se inscribieron ${this.visitantes.length} persona(s) en ${this.actividadSeleccionada.nombre} para el horario ${this.horarioSeleccionado}. ¡Disfruten su actividad en EcoHarmony Park!`
+        this.success = `🎉 ¡Inscripción exitosa! Se inscribieron ${this.visitantes.length} persona(s) en ${this.actividadSeleccionada.nombre} para el horario ${this.horarioSeleccionado.hora}. ¡Disfruten su actividad en EcoHarmony Park!`
         
         // Limpiar formulario
         this.resetearFormulario()

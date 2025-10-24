@@ -47,23 +47,25 @@
         <div class="terminos-section">
           <h4>Términos y Condiciones - {{ actividad?.nombre }}</h4>
           <div class="terminos-content">
-            <p>Al participar en esta actividad, usted acepta:</p>
-            <ul>
-              <li>Cumplir con todas las normas de seguridad del parque</li>
-              <li>Respetar el horario asignado y llegar puntualmente</li>
-              <li>Asumir la responsabilidad por su participación</li>
-              <li>Permitir el uso de su imagen para fines promocionales</li>
-              <li>Cancelaciones con 24 horas de anticipación</li>
-              <li>No consumir alcohol o sustancias prohibidas durante la actividad</li>
-              <li>Seguir las instrucciones del personal del parque</li>
-              <li>El parque se reserva el derecho de admisión</li>
-            </ul>
-            
-            <div class="terminos-warning">
-              <strong>⚠️ Importante:</strong> 
-              La participación en esta actividad es bajo su propio riesgo. 
-              EcoHarmony Park no se hace responsable por lesiones o accidentes 
-              que puedan ocurrir durante la actividad.
+            <div v-if="showFullTerms">
+              <p>Al participar en esta actividad, usted acepta:</p>
+              <ul>
+                <li>Cumplir con todas las normas de seguridad del parque</li>
+                <li>Respetar el horario asignado y llegar puntualmente</li>
+                <li>Asumir la responsabilidad por su participación</li>
+                <li>Permitir el uso de su imagen para fines promocionales</li>
+                <li>Cancelaciones con 24 horas de anticipación</li>
+                <li>No consumir alcohol o sustancias prohibidas durante la actividad</li>
+                <li>Seguir las instrucciones del personal del parque</li>
+                <li>El parque se reserva el derecho de admisión</li>
+              </ul>
+              
+              <div class="terminos-warning">
+                <strong>⚠️ Importante:</strong> 
+                La participación en esta actividad es bajo su propio riesgo. 
+                EcoHarmony Park no se hace responsable por lesiones o accidentes 
+                que puedan ocurrir durante la actividad.
+              </div>
             </div>
             
             <div class="terminos-link">
@@ -254,10 +256,10 @@ export default {
   border-radius: 0.5rem;
   padding: 1rem;
   color: #856404;
+  margin-bottom: 1rem;
 }
 
 .terminos-link {
-  margin-top: 1rem;
   text-align: center;
 }
 
